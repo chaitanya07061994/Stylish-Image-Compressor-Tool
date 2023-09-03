@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylish Image Compressor Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url(https://media.istockphoto.com/id/1185831481/photo/slender-billed-scimitar-babbler-pomatorhinus-superciliaris-mishmi-hills-arunachal-pradesh.jpg?s=2048x2048&w=is&k=20&c=ZRDnrmyr16JzYqdwUpAi3SR47hfpdvKWFMrApgjQlOs=); /* Replace 'background.jpg' with your background image URL */
+            background-size: cover;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #compressed-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        #file-size {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stylish Image Compressor Tool</h1>
+        <div class="form">
+            <label for="file">Select an image:</label>
+            <input type="file" id="file" accept="image/*">
+            <button id="compress">Compress</button>
+        </div>
+        <div class="result">
+            <h2>Compressed Image</h2>
+            <img id="compressed-image" src="" alt="Compressed Image">
+            <p id="file-size"></p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("file");
+            const compressButton = document.getElementById("compress");
+            const compressedImage = document.getElementById("compressed-image");
+            const fileSize = document.getElementById("file-size");
+
+            compressButton.addEventListener("click", async function () {
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert("Please select an image file.");
+                    return;
+                }
+
+                const compressedBlob = await compressImage(file);
+
+                if (compressedBlob) {
+                    const compressedImageUrl = URL.createObjectURL(compressedBlob);
+
+                    compressedImage.src = compressedImageUrl;
+                    fileSize.textContent = `Original Size: ${formatBytes(file.size)} | Compressed Size: ${formatBytes(compressedBlob.size)}`;
+                } else {
+                    alert("An error occurred during compression. Please try again.");
+                }
+            });
+
+            async function compressImage(inputFile) {
+                try {
+                    const image = new Image();
+                    image.src = URL.createObjectURL(inputFile);
+
+                    await image.decode();
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    canvas.width = 800; // Set the desired width here
+                    canvas.height = 800; // Set the desired height here
+
+                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    return new Promise((resolve) => {
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, "image/jpeg", 0.6); // Adjust the quality as needed (0.6 is 60% quality)
+                    });
+                } catch (error) {
+                    console.error(error);
+                    return null;
+                }
+            }
+
+            function formatBytes(bytes) {
+                if (bytes === 0) return "0 Bytes";
+
+                const k = 1024;
+                const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+            }
+        });
+    </script>
+</body>
+</html>
